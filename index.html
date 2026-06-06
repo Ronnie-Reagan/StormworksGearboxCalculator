@@ -4,530 +4,54 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Stormworks Gearbox Calculator</title>
-  <meta name="description" content="Stormworks R + 5 gearbox calculator for engine RPS, target speed, wheel size, and gearbox state mapping.">
-  <style>
-    :root {
-      --bg: #090d13;
-      --panel: #121923;
-      --panel2: #0d131b;
-      --line: #263545;
-      --muted: #8da0b3;
-      --text: #edf4fb;
-      --green: #31d184;
-      --green2: rgba(49, 209, 132, .16);
-      --red: #ff5c4d;
-      --red2: rgba(255, 92, 77, .16);
-      --amber: #ffc857;
-      --cyan: #5bd7ff;
-      --blue: #6aa7ff;
-      --shadow: 0 18px 60px rgba(0, 0, 0, .35);
-      --radius: 18px;
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      background: radial-gradient(circle at top left, #112033 0, var(--bg) 42rem);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body { padding: 22px; }
-
-    button, input, select {
-      font: inherit;
-    }
-
-    .page {
-      max-width: 90%;
-      margin: 0 auto;
-      display: grid;
-      gap: 18px;
-    }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: end;
-      padding: 20px;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: rgba(18, 25, 35, .86);
-      box-shadow: var(--shadow);
-    }
-
-    h1, h2, h3, p { margin: 0; }
-
-    h1 {
-      font-size: clamp(25px, 3vw, 42px);
-      letter-spacing: -.045em;
-      line-height: 1;
-    }
-
-    .subtitle {
-      max-width: 790px;
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .target-box {
-      min-width: 210px;
-      padding: 14px 16px;
-      border: 1px solid rgba(91, 215, 255, .32);
-      border-radius: 18px;
-      background: rgba(91, 215, 255, .08);
-      text-align: right;
-    }
-
-    .label {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .big-value {
-      margin-top: 3px;
-      color: #eafaff;
-      font-size: 28px;
-      font-weight: 950;
-      letter-spacing: -.04em;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 18px;
-    }
-
-    .stack { display: grid; gap: 18px; }
-
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: rgba(18, 25, 35, .88);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .panel-pad { padding: 18px; }
-
-    .panel-title {
-      margin-bottom: 14px;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: -.02em;
-    }
-
-    .input-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .two-cols {
-      display: grid;
-      grid-template-columns: 1fr 110px;
-      gap: 12px;
-    }
-
-    .field label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 850;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-    }
-
-    .field-row {
-      display: flex;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: var(--panel2);
-    }
-
-    input, select {
-      width: 100%;
-      min-width: 0;
-      border: 0;
-      outline: 0;
-      background: transparent;
-      color: var(--text);
-      padding: 11px 12px;
-    }
-
-    select option { color: #111; }
-
-    .suffix {
-      display: grid;
-      place-items: center;
-      min-width: 54px;
-      padding: 0 12px;
-      border-left: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .metric-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .metric {
-      padding: 13px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel2);
-    }
-
-    .metric .value {
-      margin-top: 3px;
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: -.03em;
-    }
-
-    .mode-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .toggle {
-      border: 0;
-      border-radius: 12px;
-      padding: 9px 12px;
-      background: var(--green);
-      color: #07110d;
-      font-size: 12px;
-      font-weight: 950;
-      cursor: pointer;
-    }
-
-    .toggle.manual {
-      background: var(--amber);
-      color: #171004;
-    }
-
-    .small-box {
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel2);
-      color: #bcc9d5;
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .ratio-summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 10px;
-      text-align: center;
-      font-size: 12px;
-    }
-
-    .ratio-summary div {
-      padding: 10px;
-      border-radius: 14px;
-      background: var(--panel2);
-    }
-
-    .primary-button {
-      width: 100%;
-      margin-top: 12px;
-      border: 0;
-      border-radius: 14px;
-      padding: 11px 12px;
-      background: var(--cyan);
-      color: #061019;
-      font-weight: 950;
-      cursor: pointer;
-    }
-
-    .gear-panel {
-      padding: 18px;
-    }
-
-    .gear-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .current-speed {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .current-speed strong { color: var(--text); }
-
-    .gear-buttons {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-    }
-
-    .gear-button {
-      min-height: 58px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel2);
-      color: #d2dde7;
-      font-size: 24px;
-      font-weight: 950;
-      cursor: pointer;
-      transition: transform .08s ease, border-color .12s ease, background .12s ease;
-    }
-
-    .gear-button:hover { transform: translateY(-1px); border-color: #4a6a84; }
-    .gear-button.active.forward { border-color: rgba(49, 209, 132, .75); background: var(--green2); color: #eafff4; }
-    .gear-button.active.reverse { border-color: rgba(255, 92, 77, .75); background: var(--red2); color: #fff0ef; }
-    .gear-button.active.neutral { border-color: #aab5bf; background: rgba(170, 181, 191, .16); color: white; }
-
-    .chain-wrap {
-      padding: 18px;
-      overflow-x: auto;
-    }
-
-    .chain {
-      min-width: 1160px;
-      display: flex;
-      align-items: stretch;
-      gap: 8px;
-    }
-
-    .stage {
-      width: 138px;
-      flex: 0 0 138px;
-      padding: 13px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: rgba(13, 19, 27, .92);
-    }
-
-    .stage.on {
-      border-color: rgba(49, 209, 132, .72);
-      background: var(--green2);
-    }
-
-    .stage.rev-on {
-      border-color: rgba(255, 92, 77, .76);
-      background: var(--red2);
-    }
-
-    .stage-title {
-      font-size: 12px;
-      font-weight: 950;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-
-    .stage-sub {
-      margin-top: 3px;
-      margin-bottom: 12px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .pill {
-      display: grid;
-      place-items: center;
-      min-height: 42px;
-      padding: 8px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: rgba(0, 0, 0, .16);
-      text-align: center;
-      font-size: 12px;
-      font-weight: 850;
-    }
-
-    .pill + .pill { margin-top: 8px; }
-    .pill.active { border-color: rgba(49, 209, 132, .75); background: var(--green2); }
-    .pill.rev-active { border-color: rgba(255, 92, 77, .8); background: var(--red2); }
-
-    .arrow {
-      flex: 0 0 46px;
-      display: grid;
-      place-items: center;
-      position: relative;
-    }
-
-    .arrow::before {
-      content: "";
-      width: 42px;
-      height: 5px;
-      border-radius: 99px;
-      background: #425061;
-    }
-
-    .arrow::after {
-      content: "";
-      position: absolute;
-      right: 0;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-      border-left: 12px solid #425061;
-    }
-
-    .arrow.live::before { background: var(--green); }
-    .arrow.live::after { border-left-color: var(--green); }
-    .arrow.reverse::before { background: var(--red); }
-    .arrow.reverse::after { border-left-color: var(--red); }
-
-    .tables {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 390px;
-      gap: 18px;
-    }
-
-    .table-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .badge {
-      border-radius: 999px;
-      padding: 7px 11px;
-      background: var(--green);
-      color: #07110d;
-      font-size: 12px;
-      font-weight: 950;
-      white-space: nowrap;
-    }
-
-    .badge.warn { background: var(--amber); color: #170f02; }
-    .badge.bad { background: var(--red); color: #180504; }
-
-    .table-scroll { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      min-width: 760px;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    thead { background: var(--panel2); color: var(--muted); }
-
-    th, td {
-      padding: 11px 13px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-    }
-
-    th {
-      font-size: 11px;
-      font-weight: 950;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-    }
-
-    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-    tr.selected-forward { background: var(--green2); }
-    tr.selected-reverse { background: var(--red2); }
-
-    .outputs {
-      padding: 18px;
-    }
-
-    .out-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 9px;
-      font-size: 13px;
-    }
-
-    .out {
-      padding: 12px;
-      border-radius: 14px;
-      background: var(--panel2);
-      border: 1px solid var(--line);
-    }
-
-    .out.wide { grid-column: span 2; }
-
-    pre {
-      margin: 14px 0 0;
-      max-height: 360px;
-      overflow: auto;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: #060a0f;
-      color: #d4e5f5;
-      line-height: 1.45;
-      font-size: 12px;
-      tab-size: 2;
-      white-space: pre;
-    }
-
-    .hidden { display: none !important; }
-
-    @media (max-width: 1100px) {
-      body { padding: 12px; }
-      .topbar, .layout, .tables { grid-template-columns: 1fr; }
-      .target-box { text-align: left; }
-    }
-
-    @media (max-width: 720px) {
-      .gear-buttons { grid-template-columns: repeat(4, 1fr); }
-      .two-cols, .metric-grid { grid-template-columns: 1fr; }
-      .topbar { padding: 16px; }
-    }
-  </style>
+  <meta name="description" content="Stormworks gearbox calculator for engine RPS, target speed, wheel size, forward gears, reverse gears, and gearbox state mapping.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
   <main class="page">
     <header class="topbar">
       <div>
         <h1>Stormworks Gearbox Calculator</h1>
-        <p class="subtitle">R + 5 gearbox layout for Stormworks vehicles. Calculates gearbox states, wheel RPS, and theoretical speed from engine RPS, target speed, and wheel diameter.</p>
+        <p class="subtitle" id="layoutSummary">Dynamic gearbox layout for Stormworks vehicles.</p>
       </div>
-      <div class="target-box">
-        <span class="label">Target top reduction</span>
-        <div class="big-value"><span id="targetReduction">—</span>:1</div>
+      <div class="readout-strip" aria-label="Current fit summary">
+        <div class="readout">
+          <span class="label">Top reduction</span>
+          <strong><span id="targetReduction">-</span>:1</strong>
+        </div>
+        <div class="readout">
+          <span class="label">Ranges</span>
+          <strong id="stageReadout">-</strong>
+        </div>
       </div>
     </header>
 
     <section class="layout">
       <aside class="stack">
-        <section class="panel panel-pad">
-          <h2 class="panel-title">Inputs</h2>
-          <div class="input-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Inputs</h2>
+          </div>
+          <div class="panel-body input-grid">
             <div class="field">
               <label for="engineRps">Desired engine RPS</label>
-              <div class="field-row"><input id="engineRps" type="number" min="0.1" step="0.1" value="12"><span class="suffix">RPS</span></div>
+              <div class="field-row">
+                <input id="engineRps" type="number" min="0.1" max="200" step="0.1" value="12">
+                <span class="suffix">RPS</span>
+              </div>
             </div>
+
             <div class="two-cols">
               <div class="field">
                 <label for="targetSpeed">Desired top speed</label>
-                <div class="field-row"><input id="targetSpeed" type="number" min="0.01" step="0.1" value="40"></div>
+                <div class="field-row">
+                  <input id="targetSpeed" type="number" min="0.01" max="10000" step="0.1" value="40">
+                </div>
               </div>
               <div class="field">
                 <label for="speedUnit">Unit</label>
-                <div class="field-row">
+                <div class="field-row select-row">
                   <select id="speedUnit">
                     <option value="m/s">m/s</option>
                     <option value="km/h" selected>km/h</option>
@@ -537,524 +61,150 @@
                 </div>
               </div>
             </div>
+
             <div class="field">
               <label for="wheelDiameter">Driven wheel diameter</label>
-              <div class="field-row"><input id="wheelDiameter" type="number" min="0.01" step="0.01" value="1.00"><span class="suffix">m</span></div>
+              <div class="field-row">
+                <input id="wheelDiameter" type="number" min="0.01" max="20" step="0.01" value="1.00">
+                <span class="suffix">m</span>
+              </div>
             </div>
+
+            <div class="count-grid">
+              <div class="field">
+                <label for="forwardCount">Forward gears</label>
+                <div class="field-row">
+                  <input id="forwardCount" type="number" min="1" max="16" step="1" value="5">
+                </div>
+              </div>
+              <div class="field">
+                <label for="reverseCount">Reverse gears</label>
+                <div class="field-row">
+                  <input id="reverseCount" type="number" min="1" max="16" step="1" value="1">
+                </div>
+              </div>
+            </div>
+
             <div class="field">
-              <label for="launchSpread">1st-to-5th spread</label>
-              <div class="field-row"><input id="launchSpread" type="number" min="1.05" step="0.05" value="4.5"><span class="suffix">×</span></div>
+              <label for="forwardSpread">Forward spread</label>
+              <div class="field-row">
+                <input id="forwardSpread" type="number" min="1.05" max="20" step="0.05" value="4.5">
+                <span class="suffix">x</span>
+              </div>
             </div>
-          </div>
-          <div class="metric-grid">
-            <div class="metric">
-              <span class="label">Wheel RPS at target</span>
-              <div class="value" id="targetWheelRps">—</div>
-            </div>
-            <div class="metric">
-              <span class="label">Approx. gearbox pass power</span>
-              <div class="value" id="gearboxEfficiency">—</div>
+
+            <div class="count-grid">
+              <div class="field">
+                <label for="reverseSpeedPercent">Reverse top speed</label>
+                <div class="field-row">
+                  <input id="reverseSpeedPercent" type="number" min="1" max="100" step="1" value="35">
+                  <span class="suffix">%</span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="reverseSpread">Reverse spread</label>
+                <div class="field-row">
+                  <input id="reverseSpread" type="number" min="1.05" max="20" step="0.05" value="2.5">
+                  <span class="suffix">x</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section class="panel panel-pad">
-          <div class="mode-head">
-            <h2 class="panel-title" style="margin:0">Ratios</h2>
-            <button id="modeToggle" class="toggle" type="button">Auto-fit</button>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Ratios</h2>
+            <button id="modeToggle" class="mode-button" type="button">Auto-fit</button>
           </div>
+          <div class="panel-body">
+            <div id="autoBox" class="auto-box">
+              <p>Auto-fit picks the range boxes, then assigns forward and reverse gears from the available positions.</p>
+              <div id="autoSummary" class="range-summary"></div>
+            </div>
 
-          <div id="autoBox">
-            <div class="small-box">Auto-fit searches Stormworks ratio pairs and chooses five forward states closest to the target.</div>
-            <div class="ratio-summary">
-              <div>A<br><strong id="autoA">—</strong></div>
-              <div>B<br><strong id="autoB">—</strong></div>
-              <div>C<br><strong id="autoC">—</strong></div>
+            <div id="manualBox" class="manual-box hidden">
+              <div id="manualRanges" class="manual-ranges"></div>
+              <button id="loadAuto" class="primary-button" type="button">Load auto-fit boxes</button>
             </div>
           </div>
+        </section>
 
-          <div id="manualBox" class="hidden input-grid">
-            <div class="field"><label for="manualA">Range A</label><div class="field-row"><select id="manualA"></select></div></div>
-            <div class="field"><label for="manualB">Range B</label><div class="field-row"><select id="manualB"></select></div></div>
-            <div class="field"><label for="manualC">Range C</label><div class="field-row"><select id="manualC"></select></div></div>
-            <button id="loadAuto" class="primary-button" type="button">Load auto-fit boxes</button>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Fit</h2>
           </div>
+          <div class="panel-body metric-grid">
+            <div class="metric">
+              <span class="label">Wheel RPS at target</span>
+              <strong id="targetWheelRps">-</strong>
+            </div>
+            <div class="metric">
+              <span class="label">Pass power</span>
+              <strong id="gearboxEfficiency">-</strong>
+            </div>
+            <div class="metric">
+              <span class="label">Top error</span>
+              <strong id="topError">-</strong>
+            </div>
+            <div class="metric">
+              <span class="label">Reverse top</span>
+              <strong id="reverseTopSpeed">-</strong>
+            </div>
+          </div>
+          <div id="fitWarning" class="fit-warning hidden"></div>
         </section>
       </aside>
 
       <section class="stack">
         <section class="panel gear-panel">
-          <div class="gear-head">
-            <h2 class="panel-title" style="margin:0">Driver gear</h2>
-            <div class="current-speed">Selected <strong id="selectedGearLabel">5</strong> · <span id="selectedSpeed">—</span></div>
+          <div class="panel-head">
+            <h2>Driver Gear</h2>
+            <div class="current-speed">Selected <strong id="selectedGearLabel">5</strong> / <span id="selectedSpeed">-</span></div>
           </div>
-          <div id="gearButtons" class="gear-buttons"></div>
+          <div id="gearButtons" class="gear-buttons" aria-label="Gear selector"></div>
         </section>
 
-        <section class="panel chain-wrap">
-          <h2 class="panel-title">Physical chain</h2>
-          <div class="chain">
-            <div id="stageEngine" class="stage"><div class="stage-title">Engine</div><div class="stage-sub" id="engineStageSub">—</div><div class="pill">Source</div></div>
-            <div id="arrow0" class="arrow"></div>
-            <div id="stageClutch" class="stage"><div class="stage-title">Clutch</div><div class="stage-sub">neutral control</div><div id="clutchPill" class="pill">—</div></div>
-            <div id="arrow1" class="arrow"></div>
-            <div id="stageDirection" class="stage"><div class="stage-title">Direction</div><div class="stage-sub">1:1 / -1:1</div><div id="dirFwd" class="pill">OFF · FWD</div><div id="dirRev" class="pill">ON · REV</div></div>
-            <div id="arrow2" class="arrow"></div>
-            <div id="stageA" class="stage"></div>
-            <div id="arrow3" class="arrow"></div>
-            <div id="stageB" class="stage"></div>
-            <div id="arrow4" class="arrow"></div>
-            <div id="stageC" class="stage"></div>
-            <div id="arrow5" class="arrow"></div>
-            <div id="stageOutput" class="stage"><div class="stage-title">Output</div><div class="stage-sub" id="outputStageSub">—</div><div class="pill" id="outputPill">—</div></div>
+        <section class="panel chain-panel">
+          <div class="panel-head">
+            <h2>Physical Chain</h2>
+          </div>
+          <div class="chain-scroll">
+            <div id="chain" class="chain"></div>
           </div>
         </section>
 
         <section class="tables">
           <section class="panel">
-            <div class="table-head">
-              <h2 class="panel-title" style="margin:0">Gear table</h2>
-              <div id="topError" class="badge">—</div>
+            <div class="panel-head">
+              <h2>Gear Table</h2>
             </div>
             <div class="table-scroll">
               <table>
                 <thead>
-                  <tr>
-                    <th>Gear</th>
-                    <th>A</th>
-                    <th>B</th>
-                    <th>C</th>
-                    <th class="num">Reduction</th>
-                    <th class="num">Wheel RPS</th>
-                    <th class="num">Speed</th>
-                  </tr>
+                  <tr id="gearTableHead"></tr>
                 </thead>
                 <tbody id="gearTable"></tbody>
               </table>
             </div>
           </section>
 
-          <section class="panel outputs">
-            <h2 class="panel-title">Stormworks outputs</h2>
-            <div class="out-grid">
-              <div class="out"><span class="label">Bool 1</span><strong>Direction</strong></div>
-              <div class="out"><span class="label">Bool 2</span><strong>Range A</strong></div>
-              <div class="out"><span class="label">Bool 3</span><strong>Range B</strong></div>
-              <div class="out"><span class="label">Bool 4</span><strong>Range C</strong></div>
-              <div class="out wide"><span class="label">Number 1</span><strong>Clutch target</strong></div>
+          <section class="panel outputs-panel">
+            <div class="panel-head">
+              <h2>Microcontroller Pins</h2>
+              <div class="copy-actions">
+                <span id="copyStatus" class="copy-status" aria-live="polite"></span>
+                <button id="copyLua" class="utility-button" type="button">Copy Lua</button>
+              </div>
             </div>
-            <pre id="luaMap"></pre>
+            <div class="panel-body">
+              <div id="outputGrid" class="out-grid"></div>
+              <pre id="luaMap"></pre>
+            </div>
           </section>
         </section>
       </section>
     </section>
   </main>
-
-  <script>
-    const SW_RATIOS = [
-      { label: "1:1", value: 1 },
-      { label: "6:5", value: 6 / 5 },
-      { label: "3:2", value: 3 / 2 },
-      { label: "9:5", value: 9 / 5 },
-      { label: "2:1", value: 2 },
-      { label: "5:2", value: 5 / 2 },
-      { label: "3:1", value: 3 }
-    ];
-
-    const SPEED_UNITS = {
-      "m/s": { toMps: 1, fromMps: 1 },
-      "km/h": { toMps: 1 / 3.6, fromMps: 3.6 },
-      "mph": { toMps: 0.44704, fromMps: 2.2369362921 },
-      "knots": { toMps: 0.514444, fromMps: 1.9438461718 }
-    };
-
-    const GEARS = ["R", "N", "1", "2", "3", "4", "5"];
-    const state = { selectedGear: "5", manual: false };
-
-    const $ = (id) => document.getElementById(id);
-
-    function combinations(arr, k) {
-      const out = [];
-      function rec(start, chosen) {
-        if (chosen.length === k) { out.push(chosen.slice()); return; }
-        for (let i = start; i <= arr.length - (k - chosen.length); i++) {
-          chosen.push(arr[i]);
-          rec(i + 1, chosen);
-          chosen.pop();
-        }
-      }
-      rec(0, []);
-      return out;
-    }
-
-    const COMBO_INDEXES_5_OF_8 = combinations([0, 1, 2, 3, 4, 5, 6, 7], 5);
-
-    function clamp(n, lo, hi) {
-      n = Number(n);
-      if (!Number.isFinite(n)) return lo;
-      return Math.max(lo, Math.min(hi, n));
-    }
-
-    function fmt(n, digits = 2) {
-      if (!Number.isFinite(n)) return "—";
-      if (Math.abs(n) >= 100) return n.toFixed(1);
-      if (Math.abs(n) >= 10) return n.toFixed(digits);
-      return n.toFixed(digits + 1);
-    }
-
-    function boolText(v) { return v ? "ON" : "OFF"; }
-    function speedToMps(value, unit) { return value * SPEED_UNITS[unit].toMps; }
-    function mpsToSpeed(value, unit) { return value * SPEED_UNITS[unit].fromMps; }
-
-    function makeBoxOptions() {
-      const opts = [];
-      let id = 0;
-      for (const orientation of ["away", "toward"]) {
-        for (let i = 0; i < SW_RATIOS.length; i++) {
-          for (let j = i + 1; j < SW_RATIOS.length; j++) {
-            const a = SW_RATIOS[i];
-            const b = SW_RATIOS[j];
-            const actualA = orientation === "away" ? a.value : 1 / a.value;
-            const actualB = orientation === "away" ? b.value : 1 / b.value;
-            const offIsA = actualA >= actualB;
-            const off = offIsA ? a : b;
-            const on = offIsA ? b : a;
-            const offReduction = Math.max(actualA, actualB);
-            const onReduction = Math.min(actualA, actualB);
-            if (Math.abs(offReduction - onReduction) < 1e-9) continue;
-            opts.push({
-              id: id++,
-              orientation,
-              offUi: off.label,
-              onUi: on.label,
-              offReduction,
-              onReduction,
-              title: `${orientation === "away" ? "Torque" : "Speed"}: OFF ${off.label}, ON ${on.label}`
-            });
-          }
-        }
-      }
-      return opts;
-    }
-
-    const BOX_OPTIONS = makeBoxOptions();
-
-    function optionById(id) {
-      return BOX_OPTIONS.find((o) => o.id === Number(id)) || BOX_OPTIONS[0];
-    }
-
-    function calcStates(a, b, c) {
-      const raw = [];
-      for (const sa of [false, true]) {
-        for (const sb of [false, true]) {
-          for (const sc of [false, true]) {
-            raw.push({
-              a: sa,
-              b: sb,
-              c: sc,
-              reduction:
-                (sa ? a.onReduction : a.offReduction) *
-                (sb ? b.onReduction : b.offReduction) *
-                (sc ? c.onReduction : c.offReduction)
-            });
-          }
-        }
-      }
-      raw.sort((x, y) => y.reduction - x.reduction);
-      const unique = [];
-      for (const s of raw) {
-        if (!unique.some((u) => Math.abs(Math.log(u.reduction / s.reduction)) < 0.015)) unique.push(s);
-      }
-      return unique;
-    }
-
-    function targetGearReductions(targetTopReduction, launchSpread) {
-      const spread = clamp(launchSpread, 1.05, 20);
-      return [0, 1, 2, 3, 4].map((i) => targetTopReduction * Math.pow(spread, (4 - i) / 4));
-    }
-
-    function scoreStates(states, targets) {
-      if (states.length < 5) return null;
-      let best = null;
-      const indexes = states.length === 8 ? COMBO_INDEXES_5_OF_8 : combinations(states.map((_, i) => i), 5);
-      for (const combo of indexes) {
-        const picked = combo.map((i) => states[i]).sort((a, b) => b.reduction - a.reduction);
-        let score = 0;
-        for (let i = 0; i < 5; i++) {
-          const err = Math.log(picked[i].reduction / targets[i]);
-          score += err * err;
-        }
-        const topErr = Math.log(picked[4].reduction / targets[4]);
-        score += topErr * topErr * 2.5;
-        if (!best || score < best.score) best = { score, picked };
-      }
-      return best;
-    }
-
-    function findBestPlan(targetTopReduction, launchSpread) {
-      const targets = targetGearReductions(targetTopReduction, launchSpread);
-      let best = null;
-      for (const a of BOX_OPTIONS) {
-        for (const b of BOX_OPTIONS) {
-          for (const c of BOX_OPTIONS) {
-            const scored = scoreStates(calcStates(a, b, c), targets);
-            if (!scored) continue;
-            if (!best || scored.score < best.score) best = { score: scored.score, boxes: { a, b, c }, gears: scored.picked, targets };
-          }
-        }
-      }
-      return best;
-    }
-
-    function outputForReduction(engineRps, wheelDiameter, reduction) {
-      const wheelRps = reduction === 0 ? 0 : engineRps / reduction;
-      const mps = wheelRps * Math.PI * wheelDiameter;
-      return { wheelRps, mps };
-    }
-
-    function stateForGear(plan, gear) {
-      if (!plan) return null;
-      if (gear === "N") return { clutch: 0, reverse: false, a: false, b: false, c: false, reduction: 0 };
-      if (gear === "R") {
-        const first = plan.gears[0];
-        return { clutch: 1, reverse: true, a: first.a, b: first.b, c: first.c, reduction: -first.reduction };
-      }
-      const s = plan.gears[Number(gear) - 1];
-      return { clutch: 1, reverse: false, a: s.a, b: s.b, c: s.c, reduction: s.reduction };
-    }
-
-    function makeLuaMap(plan) {
-      if (!plan) return "-- no valid plan";
-      const rows = [
-        ["R", stateForGear(plan, "R")],
-        ["1", stateForGear(plan, "1")],
-        ["2", stateForGear(plan, "2")],
-        ["3", stateForGear(plan, "3")],
-        ["4", stateForGear(plan, "4")],
-        ["5", stateForGear(plan, "5")]
-      ];
-      return [
-        "-- in N1: -1=R, 0=N, 1..5=forward",
-        "g=input.getNumber(1)",
-        "rev,a,b,c=false,false,false,false",
-        "clutch=1",
-        "if g==0 then clutch=0 end",
-        ...rows.map(([gear, s]) => {
-          const cond = gear === "R" ? "g==-1" : `g==${gear}`;
-          return `if ${cond} then rev=${s.reverse};a=${s.a};b=${s.b};c=${s.c} end`;
-        }),
-        "output.setBool(1,rev)",
-        "output.setBool(2,a)",
-        "output.setBool(3,b)",
-        "output.setBool(4,c)",
-        "output.setNumber(1,clutch)"
-      ].join("\n");
-    }
-
-    function fillSelects() {
-      for (const id of ["manualA", "manualB", "manualC"]) {
-        const el = $(id);
-        el.innerHTML = "";
-        for (const o of BOX_OPTIONS) {
-          const opt = document.createElement("option");
-          opt.value = o.id;
-          opt.textContent = o.title;
-          el.appendChild(opt);
-        }
-      }
-      $("manualA").value = BOX_OPTIONS.find((o) => o.orientation === "away" && o.offUi === "3:1" && o.onUi === "2:1")?.id ?? 0;
-      $("manualB").value = BOX_OPTIONS.find((o) => o.orientation === "away" && o.offUi === "3:1" && o.onUi === "1:1")?.id ?? 0;
-      $("manualC").value = BOX_OPTIONS.find((o) => o.orientation === "away" && o.offUi === "3:2" && o.onUi === "1:1")?.id ?? 0;
-    }
-
-    function makeGearButtons() {
-      const root = $("gearButtons");
-      root.innerHTML = "";
-      for (const g of GEARS) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "gear-button";
-        btn.textContent = g;
-        btn.dataset.gear = g;
-        btn.addEventListener("click", () => { state.selectedGear = g; render(); });
-        root.appendChild(btn);
-      }
-    }
-
-    function readInputs() {
-      const engineRps = clamp($("engineRps").value, 0.1, 200);
-      const targetSpeed = clamp($("targetSpeed").value, 0.01, 10000);
-      const speedUnit = $("speedUnit").value;
-      const wheelDiameter = clamp($("wheelDiameter").value, 0.01, 20);
-      const launchSpread = clamp($("launchSpread").value, 1.05, 20);
-      const targetMps = speedToMps(targetSpeed, speedUnit);
-      const wheelRpsTarget = targetMps / (Math.PI * wheelDiameter);
-      const targetTopReduction = engineRps / Math.max(0.0001, wheelRpsTarget);
-      return { engineRps, targetSpeed, speedUnit, wheelDiameter, launchSpread, targetMps, wheelRpsTarget, targetTopReduction };
-    }
-
-    function planFromInputs(input) {
-      const autoPlan = findBestPlan(input.targetTopReduction, input.launchSpread);
-      if (!state.manual) return { plan: autoPlan, autoPlan };
-
-      const a = optionById($("manualA").value);
-      const b = optionById($("manualB").value);
-      const c = optionById($("manualC").value);
-      const targets = targetGearReductions(input.targetTopReduction, input.launchSpread);
-      const scored = scoreStates(calcStates(a, b, c), targets);
-      const manualPlan = scored ? { score: scored.score, boxes: { a, b, c }, gears: scored.picked, targets } : autoPlan;
-      return { plan: manualPlan, autoPlan };
-    }
-
-    function setStage(id, enabled, rev) {
-      const el = $(id);
-      el.classList.toggle("on", !!enabled && !rev);
-      el.classList.toggle("rev-on", !!enabled && !!rev);
-    }
-
-    function setArrow(id, live, rev) {
-      const el = $(id);
-      el.classList.toggle("live", !!live && !rev);
-      el.classList.toggle("reverse", !!live && !!rev);
-    }
-
-    function drawGearboxStage(id, label, option, on) {
-      $(id).innerHTML = `
-        <div class="stage-title">${label}</div>
-        <div class="stage-sub">${option.orientation === "away" ? "arrows away" : "arrows toward"}</div>
-        <div class="pill ${!on ? "active" : ""}">OFF · ${option.offUi}</div>
-        <div class="pill ${on ? "active" : ""}">ON · ${option.onUi}</div>
-      `;
-      setStage(id, on, false);
-    }
-
-    function render() {
-      const input = readInputs();
-      const { plan, autoPlan } = planFromInputs(input);
-      if (!plan) return;
-
-      const current = stateForGear(plan, state.selectedGear);
-      const currentOut = outputForReduction(input.engineRps, input.wheelDiameter, Math.abs(current.reduction || 0));
-      const currentSpeed = current.reverse ? -mpsToSpeed(currentOut.mps, input.speedUnit) : mpsToSpeed(currentOut.mps, input.speedUnit);
-      const forwardRows = plan.gears.map((g, i) => {
-        const out = outputForReduction(input.engineRps, input.wheelDiameter, g.reduction);
-        return { gear: String(i + 1), ...g, wheelRps: out.wheelRps, speed: mpsToSpeed(out.mps, input.speedUnit) };
-      });
-      const topSpeedActual = forwardRows[4]?.speed || 0;
-      const topError = topSpeedActual ? ((topSpeedActual - input.targetSpeed) / input.targetSpeed) * 100 : 0;
-
-      $("targetReduction").textContent = fmt(input.targetTopReduction, 3);
-      $("targetWheelRps").textContent = fmt(input.wheelRpsTarget, 3);
-      $("gearboxEfficiency").textContent = `${fmt(Math.pow(0.95, 4) * 100, 1)}%`;
-      $("selectedGearLabel").textContent = state.selectedGear;
-      $("selectedSpeed").textContent = `${fmt(currentSpeed, 2)} ${input.speedUnit}`;
-      $("engineStageSub").textContent = `${fmt(input.engineRps, 2)} RPS`;
-      $("outputStageSub").textContent = `${fmt(currentOut.wheelRps, 2)} RPS`;
-      $("outputPill").textContent = `${fmt(currentSpeed, 2)} ${input.speedUnit}`;
-      $("clutchPill").textContent = current.clutch > 0 ? "ENGAGED" : "OPEN";
-
-      $("autoA").textContent = `${autoPlan.boxes.a.offUi}/${autoPlan.boxes.a.onUi}`;
-      $("autoB").textContent = `${autoPlan.boxes.b.offUi}/${autoPlan.boxes.b.onUi}`;
-      $("autoC").textContent = `${autoPlan.boxes.c.offUi}/${autoPlan.boxes.c.onUi}`;
-
-      $("modeToggle").textContent = state.manual ? "Manual" : "Auto-fit";
-      $("modeToggle").classList.toggle("manual", state.manual);
-      $("autoBox").classList.toggle("hidden", state.manual);
-      $("manualBox").classList.toggle("hidden", !state.manual);
-
-      for (const btn of document.querySelectorAll(".gear-button")) {
-        const g = btn.dataset.gear;
-        btn.className = "gear-button";
-        if (g === state.selectedGear) {
-          btn.classList.add("active");
-          btn.classList.add(g === "R" ? "reverse" : g === "N" ? "neutral" : "forward");
-        }
-      }
-
-      const live = current.clutch > 0;
-      setStage("stageEngine", live, current.reverse);
-      setStage("stageClutch", live, false);
-      setStage("stageDirection", current.reverse, current.reverse);
-      setStage("stageOutput", live, current.reverse);
-      for (let i = 0; i < 6; i++) setArrow(`arrow${i}`, live, current.reverse);
-
-      $("dirFwd").className = `pill ${!current.reverse ? "active" : ""}`;
-      $("dirRev").className = `pill ${current.reverse ? "rev-active" : ""}`;
-      $("clutchPill").className = `pill ${live ? "active" : ""}`;
-
-      drawGearboxStage("stageA", "Range A", plan.boxes.a, current.a);
-      drawGearboxStage("stageB", "Range B", plan.boxes.b, current.b);
-      drawGearboxStage("stageC", "Range C", plan.boxes.c, current.c);
-
-      const badge = $("topError");
-      badge.className = "badge";
-      if (Math.abs(topError) >= 15) badge.classList.add("bad");
-      else if (Math.abs(topError) >= 5) badge.classList.add("warn");
-      badge.textContent = `5th error ${fmt(topError, 1)}%`;
-
-      const rows = [];
-      for (const r of forwardRows) {
-        rows.push(`
-          <tr class="${state.selectedGear === r.gear ? "selected-forward" : ""}">
-            <td><strong>${r.gear}</strong></td>
-            <td>${boolText(r.a)}</td>
-            <td>${boolText(r.b)}</td>
-            <td>${boolText(r.c)}</td>
-            <td class="num">${fmt(r.reduction, 3)}:1</td>
-            <td class="num">${fmt(r.wheelRps, 3)}</td>
-            <td class="num">${fmt(r.speed, 2)} ${input.speedUnit}</td>
-          </tr>
-        `);
-      }
-      rows.push(`
-        <tr class="${state.selectedGear === "R" ? "selected-reverse" : ""}">
-          <td><strong>R</strong></td>
-          <td>${boolText(forwardRows[0]?.a)}</td>
-          <td>${boolText(forwardRows[0]?.b)}</td>
-          <td>${boolText(forwardRows[0]?.c)}</td>
-          <td class="num">-${fmt(forwardRows[0]?.reduction, 3)}:1</td>
-          <td class="num">-${fmt(forwardRows[0]?.wheelRps, 3)}</td>
-          <td class="num">-${fmt(forwardRows[0]?.speed, 2)} ${input.speedUnit}</td>
-        </tr>
-      `);
-      $("gearTable").innerHTML = rows.join("");
-      $("luaMap").textContent = makeLuaMap(plan);
-    }
-
-    function bind() {
-      fillSelects();
-      makeGearButtons();
-
-      for (const id of ["engineRps", "targetSpeed", "speedUnit", "wheelDiameter", "launchSpread", "manualA", "manualB", "manualC"]) {
-        $(id).addEventListener("input", render);
-        $(id).addEventListener("change", render);
-      }
-
-      $("modeToggle").addEventListener("click", () => { state.manual = !state.manual; render(); });
-      $("loadAuto").addEventListener("click", () => {
-        const input = readInputs();
-        const auto = findBestPlan(input.targetTopReduction, input.launchSpread);
-        if (!auto) return;
-        $("manualA").value = auto.boxes.a.id;
-        $("manualB").value = auto.boxes.b.id;
-        $("manualC").value = auto.boxes.c.id;
-        render();
-      });
-
-      window.addEventListener("keydown", (e) => {
-        const key = e.key.toLowerCase();
-        if (document.activeElement && ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
-        if (key === "r") state.selectedGear = "R";
-        else if (key === "n") state.selectedGear = "N";
-        else if (["1", "2", "3", "4", "5"].includes(key)) state.selectedGear = key;
-        else return;
-        render();
-      });
-
-      render();
-    }
-
-    bind();
-  </script>
 </body>
 </html>
